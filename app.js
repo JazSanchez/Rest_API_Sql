@@ -4,7 +4,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const { sequelize, models } = require('./models');
-// const routes = require('./routes.js');
+const routes = require('./routes.js');
 
 
 // variable to enable global error logging
@@ -76,4 +76,4 @@ const server = app.listen(app.get('port'), () => {
 
 
 
-// app.use('/api', routes);
+app.use('/api', routes);
