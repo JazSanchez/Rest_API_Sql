@@ -45,7 +45,7 @@ module.exports = (sequelize) => {
                       msg: 'An email is required'
                   },
                  notempty: {
-                     msg: 'Please provide an email'
+                     msg: 'Please provide a valid email'
                  }
               }
         },

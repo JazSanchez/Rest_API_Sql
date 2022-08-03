@@ -3,7 +3,7 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-const { sequelize, models } = require('./models');
+const { sequelize } = require('./models');
 const routes = require('./routes.js');
 
 
@@ -11,6 +11,22 @@ const routes = require('./routes.js');
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
 
 
+
+
+
+// create the Express app
+const app = express();
+
+// Setup request body JSON parsing.
+app.use(express.json());
+
+// Setup morgan which gives us HTTP request logging.
+app.use(morgan('dev'))
+
+// setup morgan which gives us http request logging
+app.use(morgan('dev'));
+
+app.use('/api', routes);
 // Create an async function to establish a connection 
 (async () => {
   try {
@@ -25,18 +41,6 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
     throw error;
   }
 })
-
-// create the Express app
-const app = express();
-
-// Setup request body JSON parsing.
-app.use(express.json());
-
-// Setup morgan which gives us HTTP request logging.
-app.use(morgan('dev'))
-
-// setup morgan which gives us http request logging
-app.use(morgan('dev'));
 
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
@@ -76,4 +80,3 @@ const server = app.listen(app.get('port'), () => {
 
 
 
-app.use('/api', routes);
