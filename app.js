@@ -4,7 +4,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const { sequelize } = require('./models');
-const routes = require('./routes.js');
+const routes = require('./routes');
 
 
 // variable to enable global error logging
@@ -34,7 +34,7 @@ app.use('/api', routes);
     console.log('Connection to database successful!')
 
     console.log('Syncronizing the models with the datatbase...');
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
 
   } catch (error){
     console.error('Error connecting to the database:', error)

@@ -2,9 +2,8 @@
 
 const express = require('express');
 const router = express.Router();
-const Users = require('./models').Users;
-const Courses = require('./models').Courses;
-const { authenticateUsers } = require('./middleware/auth-user');
+const { Users, Courses} = require('./models');
+const { authenticateUser } = require('./middleware/auth-user');
 
 
 
@@ -26,14 +25,15 @@ function asyncHandler(cb){
 
 
 //Route that returns a list of users.
-router.get('/users', authenticateUsers, asyncHandler(async (req, res) => {
+router.get('/users', authenticateUser, asyncHandler(async (req, res) => {
   const user = req.currentUser;
   res.status(200).json({
     id: user.id,
     firstName: user.firstName,
     lastName: user.lastName,
     emailAddress: user.emailAddress
-  })
+  });
+
 }))
 
 
@@ -42,10 +42,11 @@ router.get('/users', authenticateUsers, asyncHandler(async (req, res) => {
   //Route that creates a new user.
   router.post('/users', asyncHandler(async (req, res) => {
     try{
-     await Users.create(re.body);
+     await Users.create(req.body);
+     res.location("/");
      res.status(201).json({'message': "Account successfully created"})
     }catch(error){
-      console.log('Error', error.name);
+      // console.log('Error', error.name);
       if(error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstrainError'){
       const errors = error.errors.map(err => err.message);
       res.status(400).json({errors});
@@ -54,7 +55,7 @@ router.get('/users', authenticateUsers, asyncHandler(async (req, res) => {
       }
 
     }
-  }))
+  }));
 
    
     
@@ -96,21 +97,13 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
    
 }));
 
-router.post('/', authenticateUsers, asyncHandler( async (req, res) => {
+router.post('/courses', authenticateUser, asyncHandler( async (req, res) => {
 try{
-  if( req.boy.description && req.body.courses){
-    const courses = await Courses.create({
-      courses: req.body.course,
-      description: req.body.description
-    });
-    res.status(201).json(courses);
-
-  }else{
-    res.status(400).json({ message: 'Course and description required'})
-  }
+  const course = await Courses.create(req.body);
+  res.location(`/courses/${course.id}`);
+  res.status(201).end()
 
 }catch(error){
-  console.log('Error', error.name);
       if(error.name === 'SequelizeValidationError' || error.name === 'SequelizeUniqueConstrainError'){
       const errors = error.errors.map(err => err.message);
       res.status(400).json({errors});
@@ -123,14 +116,11 @@ try{
 }));
 
 
-router.put('/:id', authenticateUsers, asyncHandler( async(req, res) => {
+router.put('/courses/:id', authenticateUser, asyncHandler( async(req, res) => {
  try {
      const courses = await courses.findByPk(req.params.id);
-     if (courses) {
-        courses.courses = req.body.courses;
-        courses.description = req.body.description;
-
-        await Courses.update(courses);
+     if (req.currentUser === Courses.userId) {
+        await Courses.update(req.body);
         res.status(204).end();
      } else {
         res.status(404).json({message: 'Course not found'})
@@ -141,11 +131,13 @@ router.put('/:id', authenticateUsers, asyncHandler( async(req, res) => {
 }));
 
 
-router.delete('/:id', authenticateUsers, asyncHandler(async (req, res) => {
+router.delete('/courses/:id', authenticateUser, asyncHandler(async (req, res) => {
  const course = await Courses.findByPk(req.params.id);
  if (course) {
+   if(req.currentUser.id === course.userId){
      await course.destroy();
      res.status(204).end();
+   }
  } else {
      res.status(404).json({ message: 'Course not found' });
  }

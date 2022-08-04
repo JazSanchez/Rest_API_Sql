@@ -2,16 +2,17 @@
 
 const auth = require('basic-auth');
 const bcrypt = require('bcrypt');
-const { User } = require('../models');
+const { Users } = require('../models');
+
 
 // Middleware to authenticate the request
-exports.authenticateUsers = async (req, res, next) => {
+exports.authenticateUser = async (req, res, next) => {
     let message;
 
     const credentials = auth(req);
 
     if (credentials) {
-        const user = await User.findOne({ where: { emailAddress: credentials.name } });
+        const user = await Users.findOne({ where: { emailAddress: credentials.name } });
         if (user) {
             const authenticated = bcrypt.compareSync(credentials.pass, user.password);
             if (authenticated) {
@@ -21,7 +22,7 @@ exports.authenticateUsers = async (req, res, next) => {
                 message = `Authentication failure for username: ${user.emailAddress}`;
             }
         } else {
-            message = `User not found for username : ${credentials.name}`;
+            message = `User not found for username : ${credentials.emailAddress}`;
         }
     } else {
         message = 'Auth header Not Found';
