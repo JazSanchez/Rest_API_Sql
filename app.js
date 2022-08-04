@@ -26,6 +26,7 @@ app.use(morgan('dev'))
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
 
+//
 app.use('/api', routes);
 // Create an async function to establish a connection 
 (async () => {
