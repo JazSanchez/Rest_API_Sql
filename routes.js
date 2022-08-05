@@ -38,12 +38,12 @@ router.post(
     try {
       await Users.create(req.body);
       res.location("/");
-      res.status(201).json({ message: "Account successfully created" });
+      res.status(201).end();
     } catch (error) {
       // console.log('Error', error.name);
       if (
         error.name === "SequelizeValidationError" ||
-        error.name === "SequelizeUniqueConstrainError"
+        error.name === "SequelizeUniqueConstraintError"
       ) {
         const errors = error.errors.map((err) => err.message);
         res.status(400).json({ errors });
@@ -105,7 +105,7 @@ router.post(
     } catch (error) {
       if (
         error.name === "SequelizeValidationError" ||
-        error.name === "SequelizeUniqueConstrainError"
+        error.name === "SequelizeUniqueConstraintError"
       ) {
         const errors = error.errors.map((err) => err.message);
         res.status(400).json({ errors });
@@ -127,10 +127,18 @@ router.put(
         await courses.update(req.body);
         res.status(204).end();
       } else {
-        res.status(400).json();
+        res.status(404).json();
       }
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      if (
+        error.name === "SequelizeValidationError" ||
+        error.name === "SequelizeUniqueConstraintError"
+      ) {
+        const errors = error.errors.map((err) => err.message);
+        res.status(400).json({ errors });
+      } else {
+        throw error;
+      };
     }
   })
 );
